@@ -40,6 +40,7 @@ async fn main() {
         }
     });
 
+    // use custom dir for storing artefacts that tdlib creates in dev
     let root = project_root::get_project_root().unwrap();
     let artefacts_dir = format!("{}/tdlib_artefacts", root.to_str().unwrap());
 
@@ -63,6 +64,9 @@ async fn main() {
     };
 
     let params_value = serde_json::to_value(params).unwrap();
+
+    // add @type field to json as it is invalid syntax for struct field
+    // obtained from SO: https://stackoverflow.com/a/65357137
     let params_json = match params_value {
         Value::Object(m) => {
             let mut m = m.clone();
@@ -76,9 +80,9 @@ async fn main() {
     }
     .to_string();
 
-    println!("{params_json}");
     send(client_id, &params_json);
 
+    // loop to keep getting json input for send() from developer
     loop {
         let input = input().unwrap();
         send(client_id, &input);
